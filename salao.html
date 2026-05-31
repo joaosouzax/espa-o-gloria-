@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Beauty - Gestão</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#f5f0eb;--surface:#fffdf9;--card:#fdf8f3;
+  --primary:#b07d5a;--primary-dark:#8a5e3e;--primary-light:#e8d5c4;
+  --text:#3d2b1f;--muted:#9e8070;--border:#e0d0c0;
+  --danger:#c0392b;--success:#27ae60;--info:#2980b9;--warn:#e67e22;
+}
+body{font-family:'Segoe UI',sans-serif;background:var(--bg);min-height:100vh;padding:20px;color:var(--text);}
+.container{max-width:1400px;margin:0 auto;}
+
+.login-box{background:var(--surface);padding:40px;border-radius:16px;box-shadow:0 8px 30px rgba(100,60,20,.15);max-width:380px;margin:80px auto;text-align:center;border:1px solid var(--border);}
+.login-box .logo{font-size:2.2rem;margin-bottom:5px;}
+.login-box h2{color:var(--primary-dark);font-size:1.4rem;margin-bottom:4px;}
+.login-box p{color:var(--muted);font-size:.9rem;margin-bottom:25px;}
+
+.dashboard{display:none;background:var(--surface);border-radius:16px;box-shadow:0 8px 30px rgba(100,60,20,.12);overflow:hidden;border:1px solid var(--border);}
+.header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center;}
+.header h1{font-size:1.3rem;}
+.user-info{font-size:.85rem;opacity:.85;margin-right:12px;}
+.logout-btn{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.5);padding:7px 18px;border-radius:6px;cursor:pointer;}
+.logout-btn:hover{background:#fff;color:var(--primary-dark);}
+
+.tabs{display:flex;background:var(--primary-light);padding:0 20px;border-bottom:2px solid var(--border);overflow-x:auto;}
+.tab{padding:14px 20px;cursor:pointer;border:none;background:none;font-size:.9rem;color:var(--primary-dark);transition:.2s;border-bottom:3px solid transparent;white-space:nowrap;}
+.tab:hover{color:var(--primary);}
+.tab.active{color:var(--primary-dark);border-bottom-color:var(--primary-dark);font-weight:700;}
+
+.content{padding:25px;}
+.tab-content{display:none;}
+.tab-content.active{display:block;}
+h2{color:var(--primary-dark);margin-bottom:18px;font-size:1.2rem;}
+
+.form-group{margin-bottom:16px;}
+label{display:block;margin-bottom:5px;color:var(--text);font-weight:600;font-size:.85rem;}
+input,textarea,select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;background:var(--surface);color:var(--text);transition:.2s;}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--primary);}
+textarea{resize:vertical;min-height:70px;}
+
+.btn{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:10px 24px;border:none;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:600;transition:.15s;}
+.btn:hover{opacity:.88;transform:translateY(-1px);}
+.btn-danger{background:var(--danger);}
+.btn-success{background:var(--success);}
+.btn-info{background:var(--info);}
+.btn-warn{background:var(--warn);}
+.btn-secondary{background:var(--muted);}
+.btn-whatsapp{background:#25d366;}
+.btn-sm{padding:5px 11px;font-size:.78rem;}
+.btn-full{width:100%;margin-top:6px;}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:860px){.grid-2{grid-template-columns:1fr;}}
+.card{background:var(--card);padding:20px;border-radius:10px;border:1px solid var(--border);border-left:4px solid var(--primary);}
+.card h3{color:var(--primary-dark);margin-bottom:14px;font-size:1rem;}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px;margin-bottom:25px;}
+.stat-card{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:20px;border-radius:10px;text-align:center;}
+.stat-card h3{font-size:2rem;margin-bottom:4px;}
+.stat-card p{font-size:.8rem;opacity:.9;}
+
+.table-wrap{overflow-x:auto;margin-top:12px;}
+table{width:100%;border-collapse:collapse;font-size:.85rem;}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);}
+th{background:var(--primary-light);font-weight:700;color:var(--primary-dark);}
+tr:hover{background:#faf5f0;}
+tfoot td{font-weight:700;background:var(--primary-light);color:var(--primary-dark);}
+
+.badge{padding:3px 10px;border-radius:10px;font-size:.75rem;font-weight:700;}
+.badge-agendado{background:#d1ecf1;color:#0c5460;}
+.badge-concluído{background:#d4edda;color:#155724;}
+.badge-concluido{background:#d4edda;color:#155724;}
+.badge-cancelado{background:#f8d7da;color:#721c24;}
+
+.alert{padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:.9rem;}
+.alert-success{background:#d4edda;color:#155724;}
+.alert-error{background:#f8d7da;color:#721c24;}
+.alert-warning{background:#fff3cd;color:#856404;}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;justify-content:center;align-items:flex-start;padding-top:50px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:12px;padding:28px;max-width:540px;width:95%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.modal h3{color:var(--primary-dark);margin-bottom:14px;}
+.modal-footer{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+
+/* BALANCETE */
+.bal-header{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:20px;}
+.bal-header .form-group{margin:0;min-width:160px;}
+.bal-prof-card{background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:18px;overflow:hidden;}
+.bal-prof-header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;}
+.bal-prof-header h4{font-size:1rem;margin:0;}
+.bal-prof-header .total-badge{background:rgba(255,255,255,.25);padding:4px 14px;border-radius:20px;font-size:.9rem;font-weight:700;}
+.bal-resumo{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;padding:16px 18px;border-bottom:1px solid var(--border);}
+.bal-resumo-item{text-align:center;}
+.bal-resumo-item .val{font-size:1.3rem;font-weight:700;color:var(--primary-dark);}
+.bal-resumo-item .lbl{font-size:.75rem;color:var(--muted);}
+.bal-total-geral{background:linear-gradient(135deg,var(--primary-dark),#5a3520);color:#fff;border-radius:10px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+.bal-total-geral .num{font-size:1.8rem;font-weight:700;}
+.bal-acoes{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.search-input{margin-bottom:12px;}
+.wpp-link{color:#25d366;font-weight:700;text-decoration:none;font-size:.85rem;}
+.prof-tag{display:inline-block;background:var(--primary-light);color:var(--primary-dark);padding:2px 8px;border-radius:8px;font-size:.78rem;font-weight:600;}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- LOGIN -->
+<div class="login-box" id="loginBox">
+  <div class="logo">✂️</div>
+  <h2>Studio Beauty</h2>
+  <p>Gestão de Salão</p>
+  <div class="form-group"><label>Usuário</label><input type="text" id="loginUser" placeholder="seu usuário" onkeydown="if(event.key==='Enter')app.login()"></div>
+  <div class="form-group"><label>Senha</label><input type="password" id="loginPass" placeholder="sua senha" onkeydown="if(event.key==='Enter')app.login()"></div>
+  <button class="btn btn-full" onclick="app.login()">Entrar</button>
+  <div id="loginAlert" style="margin-top:12px;"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="dashboard" id="dashboard">
+  <div class="header">
+    <h1>✂️ Studio Beauty</h1>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="user-info" id="userDisplay"></span>
+      <button class="logout-btn" onclick="app.logout()">Sair</button>
+    </div>
+  </div>
+  <div class="tabs" id="tabsContainer"></div>
+  <div class="content">
+    <div id="alertContainer"></div>
+
+    <!-- DASHBOARD TAB -->
+    <div class="tab-content" id="tab-dashboard">
+      <h2>📊 Visão Geral</h2>
+      <div class="stats">
+        <div class="stat-card"><h3 id="stClientes">0</h3><p>Clientes</p></div>
+        <div class="stat-card"><h3 id="stAgendados">0</h3><p>Agendamentos Hoje</p></div>
+        <div class="stat-card"><h3 id="stPendentes">0</h3><p>Pendentes</p></div>
+        <div class="stat-card"><h3 id="stMes">0</h3><p>Concluídos no Mês</p></div>
+      </div>
+      <div class="card">
+        <h3>📅 Próximos Agendamentos</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Cliente</th><th>Serviço</th><th>Data/Hora</th><th>Profissional</th><th>Status</th><th>Lembrete</th></tr></thead>
+            <tbody id="dashAgendamentosTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLIENTES TAB -->
+    <div class="tab-content" id="tab-clientes">
+      <h2>👤 Clientes</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Novo Cliente</h3>
+          <div class="form-group"><label>Nome *</label><input type="text" id="cNome" placeholder="Nome completo"></div>
+          <div class="form-group"><label>WhatsApp * <small style="color:var(--muted)">(DDD + número, ex: 21999998888)</small></label><input type="tel" id="cWhatsApp" placeholder="21999998888" maxlength="11"></div>
+          <div class="form-group"><label>Serviços de interesse</label>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;" id="cServicosInt">
+              <label style="font-weight:400;display:flex;gap:4px;align-items:center;"><input type="checkbox" value="Tranças"> Tranças</label>
+              <label style="font-weight:400;display:flex;gap:4px;align-items:center;"><input type="checkbox" value="Unhas"> Unhas</label>
+              <label style="font-weight:400;display:flex;gap:4px;align-items:center;"><input type="checkbox" value="Cílios"> Cílios</label>
+              <label style="font-weight:400;display:flex;gap:4px;align-items:center;"><input type="checkbox" value="Sobrancelhas"> Sobrancelhas</label>
+              <label style="font-weight:400;display:flex;gap:4px;align-items:center;"><input type="checkbox" value="Progressiva"> Progressiva</label>
+            </div>
+          </div>
+          <div class="form-group"><label>Observações</label><textarea id="cObs" placeholder="Alergias, preferências..."></textarea></div>
+          <button class="btn" onclick="app.salvarCliente()">Salvar Cliente</button>
+        </div>
+        <div class="card">
+          <h3>Clientes Cadastrados</h3>
+          <input class="search-input" type="text" placeholder="🔍 Buscar..." onkeyup="app.filtrarTabela('clientesTable',this.value)">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nome</th><th>WhatsApp</th><th>Serviços</th><th>Ações</th></tr></thead>
+              <tbody id="clientesTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENDAMENTOS TAB -->
+    <div class="tab-content" id="tab-agendamentos">
+      <h2>📅 Agendamentos</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Novo Agendamento</h3>
+          <div class="form-group"><label>Cliente *</label><select id="aCliente"></select></div>
+          <div class="form-group"><label>Serviço *</label>
+            <select id="aServico">
+              <option>Tranças</option><option>Unhas - Gel</option><option>Unhas - Fibra</option>
+              <option>Unhas - Acrílico</option><option>Unhas - Esmaltação</option>
+              <option>Cílios - Volume Russo</option><option>Cílios - Fio a Fio</option><option>Cílios - Híbrido</option>
+              <option>Sobrancelhas - Design</option><option>Sobrancelhas - Micropigmentação</option>
+              <option>Progressiva</option><option>Outros</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Data e Hora *</label><input type="datetime-local" id="aData"></div>
+          <div class="form-group"><label>Profissional *</label><select id="aProfissional"></select></div>
+          <div class="form-group"><label>Valor (R$) *</label><input type="number" id="aValor" step="0.01" placeholder="0.00" min="0"></div>
+          <div class="form-group"><label>Observações</label><textarea id="aObs" placeholder="Modelo, referência..."></textarea></div>
+          <div class="form-group"><label>Status</label>
+            <select id="aStatus"><option>Agendado</option><option>Concluído</option><option>Cancelado</option></select>
+          </div>
+          <button class="btn" onclick="app.salvarAgendamento()">Salvar Agendamento</button>
+        </div>
+        <div class="card">
+          <h3>Agendamentos</h3>
+          <input class="search-input" type="text" placeholder="🔍 Buscar..." onkeyup="app.filtrarTabela('agendamentosTable',this.value)">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Cliente</th><th>Serviço</th><th>Data</th><th>Profissional</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="agendamentosTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LEMBRETES TAB -->
+    <div class="tab-content" id="tab-lembretes">
+      <h2>💬 Lembretes via WhatsApp</h2>
+      <div class="card" style="margin-bottom:20px;border-left-color:#25d366;">
+        <h3 style="color:#1a9e4a;">Como funciona</h3>
+        <p style="color:var(--muted);font-size:.88rem;line-height:1.6;">Clique em "💬 Enviar" para abrir o WhatsApp Web com a mensagem de lembrete pré-preenchida para a cliente.</p>
+      </div>
+      <div class="card">
+        <h3>📋 Agendamentos para Lembrar</h3>
+        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+          <button class="btn btn-sm" onclick="app.filtroLembrete='hoje';app.renderLembretes()">Hoje</button>
+          <button class="btn btn-sm" onclick="app.filtroLembrete='amanha';app.renderLembretes()">Amanhã</button>
+          <button class="btn btn-sm btn-secondary" onclick="app.filtroLembrete='semana';app.renderLembretes()">Esta Semana</button>
+          <button class="btn btn-sm btn-secondary" onclick="app.filtroLembrete='todos';app.renderLembretes()">Todos Futuros</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Cliente</th><th>WhatsApp</th><th>Serviço</th><th>Data/Hora</th><th>Profissional</th><th>Lembrete</th></tr></thead>
+            <tbody id="lembretesTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BALANCETE TAB (só admin) -->
+    <div class="tab-content" id="tab-balancete">
+      <h2>💰 Balancete Mensal</h2>
+
+      <div class="bal-header">
+        <div class="form-group">
+          <label>Mês</label>
+          <select id="balMes">
+            <option value="0">Janeiro</option><option value="1">Fevereiro</option>
+            <option value="2">Março</option><option value="3">Abril</option>
+            <option value="4">Maio</option><option value="5">Junho</option>
+            <option value="6">Julho</option><option value="7">Agosto</option>
+            <option value="8">Setembro</option><option value="9">Outubro</option>
+            <option value="10">Novembro</option><option value="11">Dezembro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Ano</label>
+          <input type="number" id="balAno" value="" style="max-width:100px;">
+        </div>
+        <div class="form-group" style="align-self:flex-end;">
+          <button class="btn" onclick="app.renderBalancete()">Gerar Balancete</button>
+        </div>
+      </div>
+
+      <div id="balanceteConteudo"></div>
+    </div>
+
+    <!-- USUÁRIOS TAB -->
+    <div class="tab-content" id="tab-usuarios">
+      <h2>👥 Usuários & Profissionais</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Novo Usuário</h3>
+          <div class="form-group"><label>Nome completo *</label><input type="text" id="uNome" placeholder="Nome que aparecerá nos agendamentos"></div>
+          <div class="form-group"><label>Login *</label><input type="text" id="uLogin"></div>
+          <div class="form-group"><label>Senha *</label><input type="password" id="uSenha"></div>
+          <div class="form-group"><label>Tipo de acesso</label>
+            <select id="uTipo">
+              <option value="admin">Administrador</option>
+              <option value="profissional">Profissional</option>
+              <option value="recepcao">Recepção</option>
+            </select>
+          </div>
+          <p id="uTipoInfo" style="font-size:.8rem;color:var(--muted);margin-bottom:12px;"></p>
+          <button class="btn" onclick="app.salvarUsuario()">Salvar Usuário</button>
+        </div>
+        <div class="card">
+          <h3>Usuários Cadastrados</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Nome</th><th>Login</th><th>Tipo</th><th>Ações</th></tr></thead>
+              <tbody id="usuariosTable"></tbody>
+            </table>
+          </div>
+          <div style="margin-top:16px;">
+            <h3 style="margin-bottom:10px;">👩‍💼 Profissionais Ativas</h3>
+            <div id="profissionaisLista" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- MODAL EDITAR CLIENTE -->
+<div class="modal-overlay" id="modalCliente">
+  <div class="modal">
+    <h3>✏️ Editar Cliente</h3>
+    <input type="hidden" id="editCId">
+    <div class="form-group"><label>Nome *</label><input type="text" id="editCNome"></div>
+    <div class="form-group"><label>WhatsApp *</label><input type="tel" id="editCWhatsApp" maxlength="11"></div>
+    <div class="form-group"><label>Serviços de interesse</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;" id="editCServicos">
+        <label style="font-weight:400;display:flex;gap:4px;align-items:center;"><input type="checkbox" value="Tranças"> Tranças</label>
+        <label style="font-weight:400;display:flex;gap:4px;align-items:center;"><input type="checkbox" value="Unhas"> Unhas</label>
+        <label style="font-weight:400;display:flex;gap:4px;align-items:center;"><input type="checkbox" value="Cílios"> Cílios</label>
+        <label style="font-weight:400;display:flex;gap:4px;align-items:center;"><input type="checkbox" value="Sobrancelhas"> Sobrancelhas</label>
+        <label style="font-weight:400;display:flex;gap:4px;align-items:center;"><input type="checkbox" value="Progressiva"> Progressiva</label>
+      </div>
+    </div>
+    <div class="form-group"><label>Observações</label><textarea id="editCObs"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="app.fecharModal('modalCliente')">Cancelar</button>
+      <button class="btn" onclick="app.atualizarCliente()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR AGENDAMENTO -->
+<div class="modal-overlay" id="modalAgendamento">
+  <div class="modal">
+    <h3>✏️ Editar Agendamento</h3>
+    <input type="hidden" id="editAId">
+    <div class="form-group"><label>Cliente</label><select id="editACliente"></select></div>
+    <div class="form-group"><label>Serviço</label>
+      <select id="editAServico">
+        <option>Tranças</option><option>Unhas - Gel</option><option>Unhas - Fibra</option>
+        <option>Unhas - Acrílico</option><option>Unhas - Esmaltação</option>
+        <option>Cílios - Volume Russo</option><option>Cílios - Fio a Fio</option><option>Cílios - Híbrido</option>
+        <option>Sobrancelhas - Design</option><option>Sobrancelhas - Micropigmentação</option>
+        <option>Progressiva</option><option>Outros</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Data e Hora</label><input type="datetime-local" id="editAData"></div>
+    <div class="form-group"><label>Profissional</label><select id="editAProfissional"></select></div>
+    <div class="form-group"><label>Valor (R$)</label><input type="number" id="editAValor" step="0.01" min="0"></div>
+    <div class="form-group"><label>Observações</label><textarea id="editAObs"></textarea></div>
+    <div class="form-group"><label>Status</label>
+      <select id="editAStatus"><option>Agendado</option><option>Concluído</option><option>Cancelado</option></select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="app.fecharModal('modalAgendamento')">Cancelar</button>
+      <button class="btn" onclick="app.atualizarAgendamento()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const app = {
+  KEY: 'studioBeauty_v2',
+  dados: { clientes:[], agendamentos:[], usuarios:[] },
+  usuarioPadrao: { nome:'Administrador', login:'admin', senha:btoa('admin123'), tipo:'admin' },
+  logado: null,
+  filtroLembrete: 'amanha',
+
+  init() {
+    const raw = localStorage.getItem(this.KEY);
+    if (raw) try { this.dados = JSON.parse(raw); } catch(e){}
+    if (!this.dados.usuarios?.length) this.dados.usuarios = [this.usuarioPadrao];
+    if (!this.dados.clientes) this.dados.clientes = [];
+    if (!this.dados.agendamentos) this.dados.agendamentos = [];
+    this.salvar();
+    // Info de tipo de usuário ao trocar select
+    document.getElementById('uTipo').addEventListener('change', () => {
+      const info = {
+        profissional: 'Esta profissional aparecerá no seletor de agendamentos e no balancete.',
+        admin: 'Acesso total ao sistema, incluindo balancete e usuários.',
+        recepcao: 'Pode criar clientes, agendamentos e enviar lembretes.'
+      };
+      document.getElementById('uTipoInfo').textContent = info[document.getElementById('uTipo').value] || '';
+    });
+    const sess = sessionStorage.getItem('logadoBeauty');
+    if (sess) try { this.logado = JSON.parse(sess); this.abrirDashboard(); } catch(e){}
+  },
+
+  salvar() { localStorage.setItem(this.KEY, JSON.stringify(this.dados)); },
+
+  login() {
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value;
+    const usr = this.dados.usuarios.find(x => x.login === u && atob(x.senha) === p);
+    if (usr) {
+      this.logado = usr;
+      sessionStorage.setItem('logadoBeauty', JSON.stringify(usr));
+      this.abrirDashboard();
+    } else {
+      document.getElementById('loginAlert').innerHTML = '<div class="alert alert-error">Usuário ou senha incorretos!</div>';
+    }
+  },
+
+  logout() {
+    this.logado = null;
+    sessionStorage.removeItem('logadoBeauty');
+    document.getElementById('dashboard').style.display = 'none';
+    document.getElementById('loginBox').style.display = 'block';
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginAlert').innerHTML = '';
+  },
+
+  abrirDashboard() {
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    document.getElementById('userDisplay').textContent = `${this.logado.nome} (${this.logado.tipo})`;
+    this.configurarAbas();
+    this.mostrarAba('dashboard');
+  },
+
+  configurarAbas() {
+    const abas = [
+      { id:'dashboard',    nome:'📊 Dashboard',     roles:['admin','profissional','recepcao'] },
+      { id:'clientes',     nome:'👤 Clientes',       roles:['admin','recepcao'] },
+      { id:'agendamentos', nome:'📅 Agendamentos',   roles:['admin','profissional','recepcao'] },
+      { id:'lembretes',    nome:'💬 Lembretes',      roles:['admin','recepcao'] },
+      { id:'balancete',    nome:'💰 Balancete',      roles:['admin'] },
+      { id:'usuarios',     nome:'👥 Usuários',       roles:['admin'] }
+    ];
+    const c = document.getElementById('tabsContainer');
+    c.innerHTML = '';
+    abas.filter(a => a.roles.includes(this.logado.tipo)).forEach(a => {
+      const b = document.createElement('button');
+      b.className = 'tab'; b.textContent = a.nome;
+      b.onclick = () => this.mostrarAba(a.id, b);
+      c.appendChild(b);
+    });
+  },
+
+  mostrarAba(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    const tc = document.getElementById(`tab-${id}`);
+    if (tc) tc.classList.add('active');
+    if (btn) btn.classList.add('active');
+    else document.querySelectorAll('.tab').forEach(t => { if(t.textContent.toLowerCase().includes(id.slice(0,4))) t.classList.add('active'); });
+    const render = {
+      dashboard:    () => this.renderDashboard(),
+      clientes:     () => this.renderClientes(),
+      agendamentos: () => { this.populaSelectProfissionais(); this.atualizarSelectClientes(); this.renderAgendamentos(); },
+      lembretes:    () => this.renderLembretes(),
+      balancete:    () => this.initBalancete(),
+      usuarios:     () => this.renderUsuarios()
+    };
+    render[id]?.();
+  },
+
+  alerta(msg, tipo='success') {
+    const c = document.getElementById('alertContainer');
+    c.innerHTML = `<div class="alert alert-${tipo}">${msg}</div>`;
+    setTimeout(() => c.innerHTML='', 4000);
+  },
+
+  // ── DASHBOARD ──────────────────────────────────────────────────────────
+
+  renderDashboard() {
+    const hoje = new Date().toDateString();
+    const m = new Date().getMonth(), y = new Date().getFullYear();
+    document.getElementById('stClientes').textContent = this.dados.clientes.length;
+    document.getElementById('stAgendados').textContent = this.dados.agendamentos.filter(a =>
+      new Date(a.data).toDateString()===hoje && a.status==='Agendado').length;
+    document.getElementById('stPendentes').textContent = this.dados.agendamentos.filter(a =>
+      new Date(a.data)>=new Date() && a.status==='Agendado').length;
+    document.getElementById('stMes').textContent = this.dados.agendamentos.filter(a => {
+      const d=new Date(a.data); return d.getMonth()===m&&d.getFullYear()===y&&a.status==='Concluído';
+    }).length;
+    const proximos = this.dados.agendamentos.filter(a => new Date(a.data)>=new Date()&&a.status==='Agendado')
+      .sort((a,b)=>new Date(a.data)-new Date(b.data)).slice(0,10);
+    document.getElementById('dashAgendamentosTable').innerHTML = proximos.map(a => {
+      const c = this.dados.clientes.find(cl=>cl.id==a.clienteId);
+      return `<tr>
+        <td>${c?.nome||'N/A'}</td><td>${a.servico}</td>
+        <td>${new Date(a.data).toLocaleString('pt-BR')}</td>
+        <td><span class="prof-tag">${a.profissional||'—'}</span></td>
+        <td><span class="badge badge-agendado">Agendado</span></td>
+        <td>${c?.whatsapp?this.linkWpp(c.whatsapp,a):'—'}</td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:16px;">Nenhum agendamento futuro</td></tr>';
+  },
+
+  // ── CLIENTES ───────────────────────────────────────────────────────────
+
+  salvarCliente() {
+    const nome = document.getElementById('cNome').value.trim();
+    const wpp  = document.getElementById('cWhatsApp').value.replace(/\D/g,'');
+    if (!nome||!wpp) { this.alerta('Preencha nome e WhatsApp!','error'); return; }
+    const servicos = [...document.querySelectorAll('#cServicosInt input:checked')].map(x=>x.value);
+    this.dados.clientes.push({ id:Date.now(), nome, whatsapp:wpp, servicos, obs:document.getElementById('cObs').value.trim() });
+    this.salvar(); this.renderClientes();
+    ['cNome','cWhatsApp','cObs'].forEach(id=>document.getElementById(id).value='');
+    document.querySelectorAll('#cServicosInt input').forEach(x=>x.checked=false);
+    this.alerta('Cliente salvo! ✅');
+  },
+
+  renderClientes() {
+    document.getElementById('clientesTable').innerHTML = this.dados.clientes.map(c =>
+      `<tr>
+        <td><strong>${c.nome}</strong></td>
+        <td><a class="wpp-link" href="https://wa.me/55${c.whatsapp}" target="_blank">📱 ${this.fmtWpp(c.whatsapp)}</a></td>
+        <td><small>${(c.servicos||[]).join(', ')||'—'}</small></td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn-info btn-sm" onclick="app.abrirEditarCliente(${c.id})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="app.excluirCliente(${c.id})">🗑️</button>
+        </td>
+      </tr>`
+    ).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:16px;">Nenhum cliente cadastrado</td></tr>';
+    this.atualizarSelectClientes();
+  },
+
+  excluirCliente(id) {
+    if (!confirm('Excluir este cliente?')) return;
+    this.dados.clientes = this.dados.clientes.filter(c=>c.id!==id);
+    this.salvar(); this.renderClientes(); this.alerta('Cliente excluído!');
+  },
+
+  abrirEditarCliente(id) {
+    const c = this.dados.clientes.find(x=>x.id===id); if(!c) return;
+    document.getElementById('editCId').value = c.id;
+    document.getElementById('editCNome').value = c.nome;
+    document.getElementById('editCWhatsApp').value = c.whatsapp;
+    document.getElementById('editCObs').value = c.obs||'';
+    document.querySelectorAll('#editCServicos input').forEach(x=>x.checked=(c.servicos||[]).includes(x.value));
+    document.getElementById('modalCliente').classList.add('open');
+  },
+
+  atualizarCliente() {
+    const id = parseInt(document.getElementById('editCId').value);
+    const c = this.dados.clientes.find(x=>x.id===id); if(!c) return;
+    c.nome     = document.getElementById('editCNome').value.trim();
+    c.whatsapp = document.getElementById('editCWhatsApp').value.replace(/\D/g,'');
+    c.obs      = document.getElementById('editCObs').value.trim();
+    c.servicos = [...document.querySelectorAll('#editCServicos input:checked')].map(x=>x.value);
+    this.salvar(); this.renderClientes(); this.fecharModal('modalCliente'); this.alerta('Cliente atualizado! ✅');
+  },
+
+  // ── AGENDAMENTOS ───────────────────────────────────────────────────────
+
+  profissionais() {
+    return this.dados.usuarios.filter(u=>u.tipo==='profissional'||u.tipo==='admin').map(u=>u.nome);
+  },
+
+  populaSelectProfissionais(targetId=null) {
+    const profs = this.dados.usuarios.filter(u=>u.tipo==='profissional');
+    const opts = '<option value="">Selecione a profissional</option>' +
+      profs.map(u=>`<option value="${u.nome}">${u.nome}</option>`).join('');
+    const ids = targetId ? [targetId] : ['aProfissional','editAProfissional'];
+    ids.forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=opts; });
+  },
+
+  salvarAgendamento() {
+    const clienteId = document.getElementById('aCliente').value;
+    const data      = document.getElementById('aData').value;
+    const valor     = document.getElementById('aValor').value;
+    if (!clienteId||!data) { this.alerta('Selecione cliente e data!','error'); return; }
+    if (!valor||parseFloat(valor)<=0) { this.alerta('Informe o valor do serviço!','error'); return; }
+    this.dados.agendamentos.push({
+      id: Date.now(), clienteId,
+      servico:      document.getElementById('aServico').value,
+      data,
+      profissional: document.getElementById('aProfissional').value,
+      valor:        parseFloat(valor).toFixed(2),
+      obs:          document.getElementById('aObs').value.trim(),
+      status:       document.getElementById('aStatus').value
+    });
+    this.salvar(); this.renderAgendamentos();
+    ['aData','aValor','aObs'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('aStatus').value='Agendado';
+    this.alerta('Agendamento salvo! ✅');
+  },
+
+  renderAgendamentos() {
+    const lista = [...this.dados.agendamentos].sort((a,b)=>new Date(b.data)-new Date(a.data));
+    document.getElementById('agendamentosTable').innerHTML = lista.map(a => {
+      const c = this.dados.clientes.find(cl=>cl.id==a.clienteId);
+      const statusCls = a.status==='Concluído'?'concluido':a.status==='Cancelado'?'cancelado':'agendado';
+      return `<tr>
+        <td>${c?.nome||'N/A'}</td><td>${a.servico}</td>
+        <td>${new Date(a.data).toLocaleString('pt-BR')}</td>
+        <td><span class="prof-tag">${a.profissional||'—'}</span></td>
+        <td><strong>R$ ${parseFloat(a.valor||0).toFixed(2)}</strong></td>
+        <td><span class="badge badge-${statusCls}">${a.status}</span></td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn-info btn-sm" onclick="app.abrirEditarAgendamento(${a.id})">✏️</button>
+          <button class="btn btn-danger btn-sm" onclick="app.excluirAgendamento(${a.id})">🗑️</button>
+        </td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:16px;">Nenhum agendamento</td></tr>';
+  },
+
+  excluirAgendamento(id) {
+    if (!confirm('Excluir este agendamento?')) return;
+    this.dados.agendamentos = this.dados.agendamentos.filter(a=>a.id!==id);
+    this.salvar(); this.renderAgendamentos(); this.alerta('Agendamento excluído!');
+  },
+
+  abrirEditarAgendamento(id) {
+    const a = this.dados.agendamentos.find(x=>x.id===id); if(!a) return;
+    this.atualizarSelectClientes('editACliente');
+    this.populaSelectProfissionais('editAProfissional');
+    document.getElementById('editAId').value = a.id;
+    document.getElementById('editACliente').value = a.clienteId;
+    document.getElementById('editAServico').value = a.servico;
+    document.getElementById('editAData').value = a.data;
+    document.getElementById('editAProfissional').value = a.profissional||'';
+    document.getElementById('editAValor').value = a.valor||'';
+    document.getElementById('editAObs').value = a.obs||'';
+    document.getElementById('editAStatus').value = a.status;
+    document.getElementById('modalAgendamento').classList.add('open');
+  },
+
+  atualizarAgendamento() {
+    const id = parseInt(document.getElementById('editAId').value);
+    const a = this.dados.agendamentos.find(x=>x.id===id); if(!a) return;
+    a.clienteId   = document.getElementById('editACliente').value;
+    a.servico     = document.getElementById('editAServico').value;
+    a.data        = document.getElementById('editAData').value;
+    a.profissional= document.getElementById('editAProfissional').value;
+    a.valor       = parseFloat(document.getElementById('editAValor').value||0).toFixed(2);
+    a.obs         = document.getElementById('editAObs').value.trim();
+    a.status      = document.getElementById('editAStatus').value;
+    this.salvar(); this.renderAgendamentos(); this.fecharModal('modalAgendamento'); this.alerta('Agendamento atualizado! ✅');
+  },
+
+  // ── LEMBRETES ──────────────────────────────────────────────────────────
+
+  renderLembretes() {
+    const agora = new Date();
+    const amanha = new Date(agora); amanha.setDate(amanha.getDate()+1);
+    const semana = new Date(agora); semana.setDate(semana.getDate()+7);
+    const filtro = this.filtroLembrete;
+    const lista = this.dados.agendamentos.filter(a => {
+      const d = new Date(a.data);
+      if (a.status==='Cancelado') return false;
+      if (filtro==='hoje')   return d.toDateString()===agora.toDateString();
+      if (filtro==='amanha') return d.toDateString()===amanha.toDateString();
+      if (filtro==='semana') return d>=agora&&d<=semana;
+      return d>=agora;
+    }).sort((a,b)=>new Date(a.data)-new Date(b.data));
+    document.getElementById('lembretesTable').innerHTML = lista.map(a => {
+      const c = this.dados.clientes.find(cl=>cl.id==a.clienteId);
+      const wpp = c?.whatsapp ? this.linkWpp(c.whatsapp,a,true) : '<span style="color:var(--muted);font-size:.8rem;">Sem WhatsApp</span>';
+      return `<tr>
+        <td><strong>${c?.nome||'N/A'}</strong></td>
+        <td>${c?.whatsapp?`<a class="wpp-link" href="https://wa.me/55${c.whatsapp}" target="_blank">📱 ${this.fmtWpp(c.whatsapp)}</a>`:'—'}</td>
+        <td>${a.servico}</td>
+        <td>${new Date(a.data).toLocaleString('pt-BR')}</td>
+        <td><span class="prof-tag">${a.profissional||'—'}</span></td>
+        <td>${wpp}</td>
+      </tr>`;
+    }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Nenhum agendamento neste período</td></tr>';
+  },
+
+  linkWpp(numero, ag, botao=false) {
+    const c = this.dados.clientes.find(cl=>cl.id==ag.clienteId);
+    const nome = c?.nome?.split(' ')[0]||'cliente';
+    const data = new Date(ag.data).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'});
+    const msg = encodeURIComponent(`Olá ${nome}! 💕 Lembrete do seu agendamento:\n\n✨ Serviço: ${ag.servico}\n📅 Data: ${data}${ag.profissional?'\n👩 Profissional: '+ag.profissional:''}\n\nQualquer dúvida, é só chamar! 🌸`);
+    const url = `https://wa.me/55${numero}?text=${msg}`;
+    return botao
+      ? `<a href="${url}" target="_blank" class="btn btn-whatsapp btn-sm">💬 Enviar</a>`
+      : `<a href="${url}" target="_blank" class="btn btn-whatsapp btn-sm">💬</a>`;
+  },
+
+  // ── BALANCETE ─────────────────────────────────────────────────────────
+
+  initBalancete() {
+    const hoje = new Date();
+    document.getElementById('balMes').value = hoje.getMonth();
+    document.getElementById('balAno').value = hoje.getFullYear();
+    this.renderBalancete();
+  },
+
+  renderBalancete() {
+    const mes = parseInt(document.getElementById('balMes').value);
+    const ano = parseInt(document.getElementById('balAno').value);
+    const nomeMes = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+      'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][mes];
+
+    // Filtra apenas agendamentos CONCLUÍDOS no período
+    const agsMes = this.dados.agendamentos.filter(a => {
+      const d = new Date(a.data);
+      return a.status==='Concluído' && d.getMonth()===mes && d.getFullYear()===ano;
+    });
+
+    // Agrupa por profissional
+    const profissionais = this.dados.usuarios.filter(u=>u.tipo==='profissional');
+    const grupos = {};
+    profissionais.forEach(p => { grupos[p.nome] = { ags:[], total:0 }; });
+    // Inclui profissional "sem conta" que apareçam nos agendamentos
+    agsMes.forEach(a => {
+      const prof = a.profissional || '(sem profissional)';
+      if (!grupos[prof]) grupos[prof] = { ags:[], total:0 };
+      grupos[prof].ags.push(a);
+      grupos[prof].total += parseFloat(a.valor||0);
+    });
+
+    const totalGeral = Object.values(grupos).reduce((s,g)=>s+g.total, 0);
+    const totalServicos = agsMes.length;
+
+    if (Object.keys(grupos).length === 0 || agsMes.length === 0) {
+      document.getElementById('balanceteConteudo').innerHTML =
+        `<div class="alert alert-warning">⚠️ Nenhum serviço concluído em ${nomeMes}/${ano}. Registre agendamentos com status "Concluído" para ver o balancete.</div>`;
+      return;
+    }
+
+    let html = `<div style="margin-bottom:8px;color:var(--muted);font-size:.88rem;">
+      📅 Período: <strong>${nomeMes} / ${ano}</strong> &nbsp;|&nbsp;
+      Total de serviços concluídos: <strong>${totalServicos}</strong>
+    </div>`;
+
+    // Card por profissional
+    Object.entries(grupos).forEach(([nome, g]) => {
+      if (g.ags.length === 0) return; // Oculta profissionais sem serviço no mês
+      const servContagem = {};
+      g.ags.forEach(a => { servContagem[a.servico] = (servContagem[a.servico]||0)+1; });
+      const topServ = Object.entries(servContagem).sort((a,b)=>b[1]-a[1]);
+
+      html += `<div class="bal-prof-card">
+        <div class="bal-prof-header">
+          <h4>👩 ${nome}</h4>
+          <span class="total-badge">R$ ${g.total.toFixed(2).replace('.',',')}</span>
+        </div>
+        <div class="bal-resumo">
+          <div class="bal-resumo-item"><div class="val">${g.ags.length}</div><div class="lbl">Serviços</div></div>
+          <div class="bal-resumo-item"><div class="val">R$ ${g.total.toFixed(2).replace('.',',')}</div><div class="lbl">Faturamento</div></div>
+          <div class="bal-resumo-item"><div class="val">R$ ${(g.total/g.ags.length).toFixed(2).replace('.',',')}</div><div class="lbl">Ticket Médio</div></div>
+          <div class="bal-resumo-item"><div class="val">${topServ[0]?topServ[0][0].split(' ')[0]:'—'}</div><div class="lbl">Serviço Top</div></div>
+        </div>
+        <div style="padding:0 18px 16px;">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Data</th><th>Cliente</th><th>Serviço</th><th>Valor</th></tr></thead>
+              <tbody>
+                ${g.ags.sort((a,b)=>new Date(a.data)-new Date(b.data)).map(a => {
+                  const c = this.dados.clientes.find(cl=>cl.id==a.clienteId);
+                  return `<tr>
+                    <td>${new Date(a.data).toLocaleDateString('pt-BR')}</td>
+                    <td>${c?.nome||'N/A'}</td>
+                    <td>${a.servico}</td>
+                    <td><strong>R$ ${parseFloat(a.valor||0).toFixed(2).replace('.',',')}</strong></td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+              <tfoot><tr><td colspan="3">Total</td><td>R$ ${g.total.toFixed(2).replace('.',',')}</td></tr></tfoot>
+            </table>
+          </div>
+        </div>
+      </div>`;
+    });
+
+    // Totalizador geral
+    html += `<div class="bal-total-geral">
+      <div>
+        <div style="font-size:.85rem;opacity:.8;">TOTAL GERAL — ${nomeMes} ${ano}</div>
+        <div style="font-size:.95rem;margin-top:4px;">${totalServicos} serviços concluídos</div>
+      </div>
+      <div class="num">R$ ${totalGeral.toFixed(2).replace('.',',')}</div>
+    </div>`;
+
+    // Botão copiar resumo para WhatsApp
+    html += `<div class="bal-acoes">
+      <button class="btn btn-whatsapp" onclick="app.copiarBalancete('${nomeMes}','${ano}')">📋 Copiar Resumo para WhatsApp</button>
+      <button class="btn btn-secondary" onclick="app.renderBalancete()">🔄 Atualizar</button>
+    </div>`;
+
+    document.getElementById('balanceteConteudo').innerHTML = html;
+  },
+
+  copiarBalancete(nomeMes, ano) {
+    const mes = parseInt(document.getElementById('balMes').value);
+    const anoN = parseInt(document.getElementById('balAno').value);
+    const agsMes = this.dados.agendamentos.filter(a => {
+      const d=new Date(a.data);
+      return a.status==='Concluído'&&d.getMonth()===mes&&d.getFullYear()===anoN;
+    });
+    const grupos = {};
+    agsMes.forEach(a => {
+      const prof = a.profissional||'(sem profissional)';
+      if(!grupos[prof]) grupos[prof]={total:0,qtd:0};
+      grupos[prof].total += parseFloat(a.valor||0);
+      grupos[prof].qtd++;
+    });
+    const totalGeral = Object.values(grupos).reduce((s,g)=>s+g.total,0);
+    let texto = `✂️ *BALANCETE ${nomeMes.toUpperCase()} ${ano}*\n`;
+    texto += `━━━━━━━━━━━━━━━━━━━\n`;
+    Object.entries(grupos).forEach(([nome,g]) => {
+      texto += `\n👩 *${nome}*\n   ${g.qtd} serviço(s) → R$ ${g.total.toFixed(2).replace('.',',')}\n`;
+    });
+    texto += `\n━━━━━━━━━━━━━━━━━━━\n💰 *TOTAL GERAL: R$ ${totalGeral.toFixed(2).replace('.',',')}*`;
+    navigator.clipboard.writeText(texto).then(() => this.alerta('Resumo copiado! Cole no WhatsApp ✅'));
+  },
+
+  // ── USUÁRIOS ───────────────────────────────────────────────────────────
+
+  salvarUsuario() {
+    const nome  = document.getElementById('uNome').value.trim();
+    const login = document.getElementById('uLogin').value.trim();
+    const senha = document.getElementById('uSenha').value;
+    const tipo  = document.getElementById('uTipo').value;
+    if (!nome||!login||!senha) { this.alerta('Preencha todos os campos!','error'); return; }
+    if (this.dados.usuarios.find(x=>x.login===login)) { this.alerta('Este login já existe!','error'); return; }
+    this.dados.usuarios.push({ nome, login, senha:btoa(senha), tipo });
+    this.salvar(); this.renderUsuarios();
+    ['uNome','uLogin','uSenha'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('uTipoInfo').textContent='';
+    const msg = tipo==='profissional'
+      ? `Profissional "${nome}" cadastrada! Ela aparecerá nos agendamentos. ✅`
+      : 'Usuário criado com sucesso! ✅';
+    this.alerta(msg);
+  },
+
+  renderUsuarios() {
+    document.getElementById('usuariosTable').innerHTML = this.dados.usuarios.map(u =>
+      `<tr>
+        <td><strong>${u.nome}</strong></td><td>${u.login}</td>
+        <td><span class="badge badge-${u.tipo==='admin'?'agendado':u.tipo==='profissional'?'concluido':'pendente'}">${u.tipo}</span></td>
+        <td>${u.login==='admin'
+          ? '<span style="color:var(--muted);font-size:.8rem;">Protegido</span>'
+          : `<button class="btn btn-danger btn-sm" onclick="app.excluirUsuario('${u.login}')">🗑️</button>`}
+        </td>
+      </tr>`
+    ).join('');
+    // Lista de profissionais ativas
+    const profs = this.dados.usuarios.filter(u=>u.tipo==='profissional');
+    document.getElementById('profissionaisLista').innerHTML = profs.length
+      ? profs.map(p=>`<span class="prof-tag" style="font-size:.9rem;padding:5px 14px;">✂️ ${p.nome}</span>`).join('')
+      : '<span style="color:var(--muted);font-size:.85rem;">Nenhuma profissional cadastrada ainda.</span>';
+  },
+
+  excluirUsuario(login) {
+    if (login==='admin') return;
+    if (login===this.logado.login) { this.alerta('Não pode excluir seu próprio usuário!','error'); return; }
+    if (!confirm('Excluir este usuário?')) return;
+    this.dados.usuarios = this.dados.usuarios.filter(u=>u.login!==login);
+    this.salvar(); this.renderUsuarios(); this.alerta('Usuário excluído!');
+  },
+
+  // ── HELPERS ────────────────────────────────────────────────────────────
+
+  atualizarSelectClientes(targetId=null) {
+    const opts = '<option value="">Selecione um cliente</option>' +
+      this.dados.clientes.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+    (targetId?[targetId]:['aCliente','editACliente']).forEach(id => {
+      const el=document.getElementById(id); if(el) el.innerHTML=opts;
+    });
+  },
+
+  filtrarTabela(tbodyId, busca) {
+    const b=busca.toLowerCase();
+    document.querySelectorAll(`#${tbodyId} tr`).forEach(tr=>{
+      tr.style.display=tr.textContent.toLowerCase().includes(b)?'':'none';
+    });
+  },
+
+  fmtWpp(n) {
+    const d=n.replace(/\D/g,'');
+    if(d.length===11) return `(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`;
+    if(d.length===10) return `(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`;
+    return d;
+  },
+
+  fecharModal(id) { document.getElementById(id).classList.remove('open'); }
+};
+
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+
+app.init();
+</script>
+</body>
+</html>
